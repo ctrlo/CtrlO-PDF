@@ -353,6 +353,32 @@ sub _down
     $self->_set__y($y - $points);
 }
 
+=head2 current_y
+
+Returns the current y position on the page. This value updates as the page is
+written to, and is the location that content will be positioned at the next
+write.
+
+=cut
+
+sub current_y
+{   my $self = shift;
+    $self->_y;
+}
+
+=head2 set_current_y($pixels)
+
+Sets the current Y position. See L</current_y>.
+
+=cut
+
+sub set_current_y
+{   my ($self, $y) = @_;
+    $y && $y =~ /^[0-9]+$/
+        or croak "Invalid y value for set_current_y: $y";
+    $self->_set__y($y);
+}
+
 has _y => (
     is      => 'rwp',
     lazy    => 1,
