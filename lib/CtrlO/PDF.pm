@@ -368,7 +368,7 @@ sub _y_start_default
 
 Add a heading. If called on a new page, will automatically move the cursor down
 to account for the heading's height (based on the assumption that one pixel
-equals one point). Options available are C<size>, C<topmargin> and
+equals one point). Options available are C<size>, C<indent>, C<topmargin> and
 C<bottommargin>.
 
 =cut
@@ -386,7 +386,7 @@ sub heading
     my $tb  = PDF::TextBlock->new({
         pdf  => $self->pdf,
         page => $self->page,
-        x    => $self->_x,
+        x    => $self->_x + ($options{indent} || 0),
         y    => $self->_y,
         fonts => {
             b => PDF::TextBlock::Font->new({
@@ -405,7 +405,7 @@ sub heading
 
 =head2 text($text, %options)
 
-Add paragraph text. This will automatically paginate. Options available are C<color>.
+Add paragraph text. This will automatically paginate. Options available are C<color> and C<indent>.
 
 =cut
 
@@ -431,7 +431,7 @@ sub text
     my $tb  = PDF::TextBlock->new({
         pdf   => $self->pdf,
         page  => $self->page,
-        x     => $self->_x,
+        x     => $self->_x + ($options{indent} || 0),
         y     => $self->_y,
         w     => $self->_width_print,
         h     => $self->_y - $self->margin - 30,
