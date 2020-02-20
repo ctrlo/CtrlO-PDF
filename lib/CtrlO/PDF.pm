@@ -445,14 +445,15 @@ sub heading
 
 =head2 text($text, %options)
 
-Add paragraph text. This will automatically paginate. Options available are C<color> and C<indent>.
+Add paragraph text. This will automatically paginate. Options available are
+C<size>, C<color> and C<indent>.
 
 =cut
 
 sub text
 {   my ($self, $string, %options) = @_;
     my $text = $self->page->text;
-    my $size = 10;
+    my $size = $options{size} || 10;
     $text->font($self->font, $size);
     $text->translate($self->_x, $self->_y);
     $text->fillcolor($options{color}) if $options{color};
