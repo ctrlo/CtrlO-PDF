@@ -353,30 +353,44 @@ sub _down
     $self->_set__y($y - $points);
 }
 
-=head2 current_y
+=head2 y_position
 
 Returns the current y position on the page. This value updates as the page is
 written to, and is the location that content will be positioned at the next
-write.
+write. Note that the value is measured from the bottom of the page.
 
 =cut
 
-sub current_y
+sub y_position
 {   my $self = shift;
     $self->_y;
 }
 
-=head2 set_current_y($pixels)
+=head2 set_y_position($pixels)
 
 Sets the current Y position. See L</current_y>.
 
 =cut
 
-sub set_current_y
+sub set_y_position
 {   my ($self, $y) = @_;
     $y && $y =~ /^[0-9]+$/
-        or croak "Invalid y value for set_current_y: $y";
+        or croak "Invalid y value for set_y_position: $y";
     $self->_set__y($y);
+}
+
+=head2 move_y_position($pixels)
+
+Moves the current Y position, relative to its current value. Positive values
+will move the cursor up the page, negative values down. See L</current_y>.
+
+=cut
+
+sub move_y_position
+{   my ($self, $y) = @_;
+    $y && $y =~ /^[0-9]+$/
+        or croak "Invalid y value for move_y_position: $y";
+    $self->_set__y($self->_y + $y);
 }
 
 has _y => (
