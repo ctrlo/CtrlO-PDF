@@ -532,6 +532,9 @@ PDF::Table.
 sub table
 {   my ($self, %options) = @_;
 
+    # Move onto new page if little space left on this one
+    $self->add_page if $self->_y < 100;
+
     my $table = PDF::Table->new;
 
     my $data = delete $options{data};
