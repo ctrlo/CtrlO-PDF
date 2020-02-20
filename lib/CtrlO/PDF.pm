@@ -123,6 +123,11 @@ sub add_page
     $page->mediabox(0, 0, $self->width, $self->height);
     $self->_set_page($page);
     $self->_set__y($self->_y_start_default); # Reset y cursor
+    if ($self->logo && $self->pdf->pages > 1)
+    {
+        $self->_down($self->logo_height);
+        $self->_down($self->logo_padding);
+    }
     # Flag that we have just started a new page. Because text is positioned from
     # its bottom-left corner, we will need to move the cursor down further to
     # account for the font size of the text, but we don't know that yet.
@@ -461,11 +466,6 @@ sub text
     if ($self->is_new_page)
     {
         $self->_down($size);
-        if ($self->logo)
-        {
-            $self->_down($self->logo_height);
-            $self->_down($self->logo_padding);
-        }
         $self->_set_is_new_page(0);
     }
 
@@ -498,8 +498,6 @@ sub text
         last unless $string; # while loop does not work with $string
         $self->add_page;
         $self->_down($size);
-        $self->_down($self->logo_height);
-        $self->_down($self->logo_padding);
         $tb  = PDF::TextBlock->new({
             pdf   => $self->pdf,
             page  => $self->page,
