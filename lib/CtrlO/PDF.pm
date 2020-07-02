@@ -12,7 +12,7 @@ use PDF::API2;
 use PDF::Table;
 use PDF::TextBlock;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME 
 
