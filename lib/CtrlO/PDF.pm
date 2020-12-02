@@ -24,7 +24,7 @@ CtrlO::PDF - high level PDF creator
   use Text::Lorem;
 
   my $pdf = CtrlO::PDF->new(
-      logo        => "logo.png", # optional
+      logo        => "sample/logo.png", # optional
       orientation => "portrait", # Default
       footer      => "My PDF document footer",
   );
