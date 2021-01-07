@@ -11,6 +11,7 @@ CtrlO::PDF - high level PDF creator
         logo        => "sample/logo.png", # optional
         orientation => "portrait", # Default
         footer      => "My PDF document footer",
+        PDFlib      => "Builder",  # Default
     );
 
     # Add a page
@@ -61,15 +62,15 @@ pagination, headings, paragraph text, images and tables. Although there are a
 number of other modules to create PDFs with a high-level interface, I found
 that these each lack certain features (e.g. image insertion, paragraph text).
 This module tries to include each of those features through another existing
-module. Also, it is built on PDF::API2, and provides access to that object, so
-content can also be added directly using that, thereby providing any powerful
-features required.
+module. Also, it is built on your choice of PDF::Builder or PDF::API2, and 
+provides access to that object, so content can also be added directly using 
+that, thereby providing any powerful features required.
 
 # METHODS
 
 ## pdf
 
-Returns the `PDF::API2` object used to create the PDF.
+Returns the `PDF::Builder` or `PDF::API2` object used to create the PDF.
 
 ## page
 
@@ -120,9 +121,10 @@ Sets or returns the footer text. Page numbers are added automatically.
 
 ## font
 
-Sets or returns the font. This is based on PDF::API2 ttfont which returns a
-TrueType or OpenType font object. By default it assumes the font is available
-in the exact path `truetype/liberation/LiberationSans-Regular.ttf`. A future
+Sets or returns the font. This is based on `PDF::Builder` or `PDF::API2` 
+ttfont, which returns a TrueType or OpenType font object. By default, it 
+assumes the font is available in the exact path 
+`truetype/liberation/LiberationSans-Regular.ttf`. A future
 version may make this more flexible.
 
 ## fontbold
