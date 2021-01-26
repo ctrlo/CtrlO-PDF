@@ -11,7 +11,7 @@ use MooX::Types::MooseLike::Base qw(:all);
 use PDF::Table;
 use PDF::TextBlock;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 NAME
 

@@ -1,5 +1,10 @@
 Revision history for CtrlO::PDF
 
+0.09 Tue Jan 26 2021
+
+    * Further workdaround for words that are too long, when they don't have
+      any more words after them
+
 0.08 Wed Jan 06 2021
 
     * remove PDF::API2 as a prerequisite, allowing PDF::Builder to be used
