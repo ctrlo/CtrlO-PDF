@@ -632,6 +632,9 @@ sub text
         if ($string_before eq $string)
         {
             carp "Unable to fit text onto line: $string";
+            # If no more breaks then skip
+            last if $string !~ /\s/;
+            # Otherwise start from after next break
             $string =~ s/\S+\s//;
             $tb->text($string);
             ($endw, $ypos, $string) = $tb->apply;
