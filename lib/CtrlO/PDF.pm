@@ -13,7 +13,7 @@ use PDF::TextBlock;
 
 our $VERSION = '0.08';
 
-=head1 NAME 
+=head1 NAME
 
 CtrlO::PDF - high level PDF creator
 
@@ -90,8 +90,8 @@ pagination, headings, paragraph text, images and tables. Although there are a
 number of other modules to create PDFs with a high-level interface, I found
 that these each lack certain features (e.g. image insertion, paragraph text).
 This module tries to include each of those features through another existing
-module. Also, it is built on either PDF::Builder or PDF::API2, and provides 
-access to that object, so content can also be added directly using that, 
+module. Also, it is built on either PDF::Builder or PDF::API2, and provides
+access to that object, so content can also be added directly using that,
 thereby providing any powerful features required.
 
 =head1 METHODS
@@ -128,13 +128,13 @@ sub _build_pdf
             if (!defined $rc) {
                 die "Neither PDF::Builder nor PDF::API2 is installed!\n";
             } else {
- 	       #print "PDF::Builder requested, but was not available. Using PDF::API2\n";
+                #print "PDF::Builder requested, but was not available. Using PDF::API2\n";
                 PDF::API2->new;
             }
         } else {
             PDF::Builder->new;
         }
- 
+
     } else {
         # PDF::API2 preferred, try to see if it's installed
         $rc = eval {
@@ -150,15 +150,15 @@ sub _build_pdf
             if (!defined $rc) {
                 die "Neither PDF::API2 nor PDF::Builder is installed!\n";
             } else {
- 	       #print "PDF::API2 requested, but was not available. Using PDF::Builder\n";
+                #print "PDF::API2 requested, but was not available. Using PDF::Builder\n";
                 PDF::Builder->new;
             }
         } else {
             PDF::API2->new;
         }
- 
+
     }
- 
+
 }
 
 =head2 page
@@ -243,9 +243,9 @@ has orientation => (
 
 =head2 PDFlib
 
-Sets or returns the PDF-building library in use. The choices are "PDF::Builder" 
-and "PDF::API2" (case-insensitive). "PDF::Builder" is the default, indicating 
-that PDF::Builder will be used I<unless> it is not found, in which case 
+Sets or returns the PDF-building library in use. The choices are "PDF::Builder"
+and "PDF::API2" (case-insensitive). "PDF::Builder" is the default, indicating
+that PDF::Builder will be used I<unless> it is not found, in which case
 PDF::API2 will be used. If neither is found, CtrlO::PDF will fail.
 
 =cut
@@ -344,9 +344,9 @@ has footer => (
 
 =head2 font
 
-Sets or returns the font. This is based on PDF::Builder or PDF::API2 ttfont, 
-which returns a TrueType or OpenType font object. By default it assumes the 
-font is available in the exact path 
+Sets or returns the font. This is based on PDF::Builder or PDF::API2 ttfont,
+which returns a TrueType or OpenType font object. By default it assumes the
+font is available in the exact path
 C<truetype/liberation/LiberationSans-Regular.ttf>. A future
 version may make this more flexible.
 
@@ -640,11 +640,11 @@ sub text
                 b => PDF::TextBlock::Font->new({
                     pdf  => $self->pdf,
                     font => $self->fontbold,
-		   #fillcolor => ??,   TBD
+                   #fillcolor => ??,   TBD
                 }),
-	        # TBD any way to specify the "normal" font? otherwise, 
-		# PDF::TextBlock opens up Helvetica corefont.
-		# see PDF::TextBlock::Font for possible solution
+                # TBD any way to specify the "normal" font? otherwise,
+                # PDF::TextBlock opens up Helvetica corefont.
+                # see PDF::TextBlock::Font for possible solution
             },
         });
     }
@@ -682,7 +682,7 @@ sub table
         w         => $self->_width_print,
         font_size => 10,
         padding   => 5,
-	# start_y deprecated, change soon to y. start_h deprecated, change to h
+        # start_y deprecated, change soon to y. start_h deprecated, change to h
         y         => $self->_y,
         h         => $self->height - ($self->height - $self->_y) - $self->margin - $hf_space,
         next_y    => $self->height - $self->margin - ($self->height - $self->_y_start_default),
@@ -799,7 +799,7 @@ sub content
 Copyright 2018-2021 Ctrl O Ltd
 
 This program is free software; you can redistribute it and/or modify it under
-the terms of either: the GNU General Public License (GPL) as published by the 
+the terms of either: the GNU General Public License (GPL) as published by the
 Free Software Foundation; or the Perl Artistic License (PAL).
 
 See http://dev.perl.org/licenses/ for more information.
