@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Carp qw/croak/;
+use Carp qw/croak carp/;
 use Image::Info qw(image_info image_type);
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
@@ -623,7 +623,19 @@ sub text
         !$string and last;
         $tb->text($string);
         my $endw; my $ypos;
+        my $string_before = $string;
         ($endw, $ypos, $string) = $tb->apply;
+        # Check whether no text has been added to the page. This happens if the
+        # word is too long. If so, warn, chop-off and retry, otherwise an
+        # infinite loop occurs. Ideally the word would be broken - issue will
+        # be raised in PDF::TextBlock to see if this is possible.
+        if ($string_before eq $string)
+        {
+            carp "Unable to fit text onto line: $string";
+            $string =~ s/\S+\s//;
+            $tb->text($string);
+            ($endw, $ypos, $string) = $tb->apply;
+        }
         $self->_set__y($ypos);
         last unless $string; # while loop does not work with $string
         $self->add_page;
