@@ -632,31 +632,40 @@ sub text
     });
     while (1)
     {
-        # For reasons I do not understand, $string manages to gain newlines
-        # between the end and beginning of this loop. Chop them off, and end if
-        # there's nothing left
-        $string =~ s/\s+$//;
-        !$string and last;
-        $tb->text($string);
-        my $endw; my $ypos;
-        my $string_before = $string;
-        ($endw, $ypos, $string) = $tb->apply;
-        # Check whether no text has been added to the page. This happens if the
-        # word is too long. If so, warn, chop-off and retry, otherwise an
-        # infinite loop occurs. Ideally the word would be broken - issue will
-        # be raised in PDF::TextBlock to see if this is possible.
-        if ($string_before eq $string)
+        # First check whether there is any room on the page for the text. If
+        # not, start a new page. This code is copied directly from the same
+        # check in PDF::TextBlock, with 15 being the default lead. We can no
+        # longer rely on PDF::TextBlock returning the same $string to know to
+        # insert a new page, as we now use that to check for words that are too
+        # long
+        if ($tb->y >= $tb->y - $tb->h + 15) # Same condition as PDF::TextBlock
         {
-            carp "Unable to fit text onto line: $string";
-            # If no more breaks then skip
-            last if $string !~ /\s/;
-            # Otherwise start from after next break
-            $string =~ s/\S+\s//;
+            # For reasons I do not understand, $string manages to gain newlines
+            # between the end and beginning of this loop. Chop them off, and end if
+            # there's nothing left
+            $string =~ s/\s+$//;
+            !$string and last;
             $tb->text($string);
+            my $endw; my $ypos;
+            my $string_before = $string;
             ($endw, $ypos, $string) = $tb->apply;
+            # Check whether no text has been added to the page. This happens if the
+            # word is too long. If so, warn, chop-off and retry, otherwise an
+            # infinite loop occurs. Ideally the word would be broken - issue will
+            # be raised in PDF::TextBlock to see if this is possible.
+            if ($string_before eq $string)
+            {
+                carp "Unable to fit text onto line: $string";
+                # If no more breaks then skip
+                last if $string !~ /\s/;
+                # Otherwise start from after next break
+                $string =~ s/\S+\s//;
+                $tb->text($string);
+                ($endw, $ypos, $string) = $tb->apply;
+            }
+            $self->_set__y($ypos);
+            last unless $string; # while loop does not work with $string
         }
-        $self->_set__y($ypos);
-        last unless $string; # while loop does not work with $string
         $self->add_page;
         $self->_down($size); # TBD again, font size as line height?
         $tb  = PDF::TextBlock->new({
