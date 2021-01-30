@@ -549,6 +549,16 @@ sub heading
         x    => $self->_x + ($options{indent} || 0),
         y    => $self->_y,
         fonts => {
+            # Workaround a bug in PDF::TextBlock which defines word spacing
+            # based on the default font. This can lead to spacing that is too
+            # small if only using a bold font with a large font size. Define
+            # the default font to be the same as the bold font that we will
+            # use.
+            default => PDF::TextBlock::Font->new({
+                pdf  => $self->pdf,
+                font => $self->fontbold,
+                size => $size,
+            }),
             b => PDF::TextBlock::Font->new({
                 pdf  => $self->pdf,
                 font => $self->fontbold,
