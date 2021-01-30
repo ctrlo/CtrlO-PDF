@@ -761,7 +761,11 @@ Add an image. Options available are:
 
 =item scaling I<n>
 
-    C<n> is the scaling factor for the image, B<default 0.5> (50%)
+C<n> is the scaling factor for the image, B<default 0.5> (50%)
+
+=item alignment I<name>
+
+C<name> is the horizontal alignment, B<default center>
 
 =back
 
@@ -773,11 +777,16 @@ sub image
     my $info = image_info($file);
     my $width = $info->{width};
     my $height = $info->{height};
+    my $alignment = $options{alignment} || 'center';
     $height = $height * $scaling;
     $width  = $width * $scaling;
     $self->add_page if $height > $self->_y;
     $self->_down($height);
-    my $x = ($self->width / 2) - ($width / 2);
+    my $x = $alignment eq 'left'
+        ? $self->margin
+        : $alignment eq 'right'
+        ? $self->width - $self->margin - $width
+        : ($self->width / 2) - ($width / 2);
     my $type = lc 'image_'._image_type($file);
     my $image = $self->pdf->$type($file);
     my $gfx = $self->page->gfx;
