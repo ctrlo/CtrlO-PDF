@@ -589,9 +589,7 @@ sub text
 {   my ($self, $string, %options) = @_;
     my $text = $self->page->text;
     my $size = $options{size} || 10;
-    $text->font($self->font, $size);
-    $text->translate($self->_x, $self->_y);
-    $text->fillcolor($options{color}) if $options{color};
+    my $color = $options{color} || 'black';
 
     if ($self->is_new_page)
     {
@@ -608,9 +606,17 @@ sub text
         h     => $self->_y - $self->margin - 30,
         align => 'left',
         fonts => {
+            default => PDF::TextBlock::Font->new({
+                pdf       => $self->pdf,
+                font      => $self->font,
+                size      => $size,
+                fillcolor => $color,
+            }),
             b => PDF::TextBlock::Font->new({
-                pdf  => $self->pdf,
-                font => $self->fontbold,
+                pdf       => $self->pdf,
+                font      => $self->fontbold,
+                size      => $size,
+                fillcolor => $color,
             }),
         },
     });
@@ -652,20 +658,22 @@ sub text
             h     => $self->_y - $self->margin - 30,
             align => 'left',
             fonts => {
-                b => PDF::TextBlock::Font->new({
-                    pdf  => $self->pdf,
-                    font => $self->fontbold,
-                   #fillcolor => ??,   TBD
+                default => PDF::TextBlock::Font->new({
+                    pdf       => $self->pdf,
+                    font      => $self->font,
+                    size      => $size,
+                    fillcolor => $color,
                 }),
-                # TBD any way to specify the "normal" font? otherwise,
-                # PDF::TextBlock opens up Helvetica corefont.
-                # see PDF::TextBlock::Font for possible solution
+                b => PDF::TextBlock::Font->new({
+                    pdf       => $self->pdf,
+                    font      => $self->fontbold,
+                    size      => $size,
+                    fillcolor => $color,
+                }),
             },
         });
     }
 
-    $text->fillcolor('black') if $options{color}; # Reset color
-          # TBD what if the original color wasn't black?
     $self->_down(5);
 }
 
@@ -792,6 +800,10 @@ sub content
         }
         my $text = $page->text;
         $text->font($self->font, 10);
+        # Specify the header and footer color, otherwise it takes the color of
+        # the last text block which can lead to unexpected behaviour. TODO:
+        # Allow this to be defined somehow.
+        $text->fillcolor('black');
         if (my $header = $self->header)
         {
             $text->translate(int($self->width / 2), $self->height - $self->margin);
