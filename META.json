@@ -41,7 +41,7 @@
             "MooX::Types::MooseLike::Base" : "0",
            #"PDF::API2" : "0",
             "PDF::Table" : "0",
-            "PDF::TextBlock" : "0"
+            "PDF::TextBlock" : "0.13"
          }
       }
    },

@@ -9,7 +9,7 @@ use Image::Info qw(image_info image_type);
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
 use PDF::Table;
-use PDF::TextBlock;
+use PDF::TextBlock 0.13;
 
 our $VERSION = '0.09';
 
