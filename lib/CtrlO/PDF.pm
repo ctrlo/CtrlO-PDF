@@ -568,11 +568,13 @@ C<n> is the amount (in points) to indent the text, B<default 0>
 
 =item topmargin I<n>
 
-C<n> is the amount (in points) of vertical skip for the margin I<above> the heading, B<default 0>
+C<n> is the amount (in points) of vertical skip for the margin I<above> the
+heading, B<default:> calculated automatically based on font size
 
 =item bottommargin I<n>
 
-C<n> is the amount (in points) of vertical skip for the margin I<below> the heading, B<default 10>
+C<n> is the amount (in points) of vertical skip for the margin I<below> the
+heading, B<default:> calculated automatically based on the font size
 
 =back
 
