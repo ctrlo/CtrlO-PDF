@@ -190,11 +190,6 @@ sub add_page
     $page->mediabox(0, 0, $self->width, $self->height);
     $self->_set_page($page);
     $self->_set__y($self->_y_start_default); # Reset y cursor
-    if ($self->logo && $self->pdf->pages > 1)
-    {
-        $self->_down($self->logo_height);
-        $self->_down($self->logo_padding);
-    }
     # Flag that we have just started a new page. Because text is positioned from
     # its bottom-left corner, we will need to move the cursor down further to
     # account for the font size of the text, but we don't know that yet.
@@ -309,6 +304,49 @@ has margin => (
     isa     => Int,
     default => 40,
 );
+
+=head2 margin_top
+
+Sets or returns the top margin. Defaults to the margin + top_padding +
+room for the header (if defined) + room for the logo (if defined).
+
+=cut
+
+has margin_top => (
+    is      => 'lazy',
+    isa     => Int,
+);
+
+sub _build_margin_top
+{   my $self = shift;
+    my $size = $self->margin + $self->top_padding;
+    $size += 15 if $self->header; # Arbitrary number to allow 10px of header text
+    if ($self->logo)
+    {
+        $size += $self->logo_height;
+        $size += $self->logo_padding;
+    }
+    return $size;
+};
+
+=head2 margin_bottom
+
+Sets or returns the bottom margin. Defaults to the margin + room for the
+footer.
+
+=cut
+
+has margin_bottom => (
+    is      => 'lazy',
+    isa     => Int,
+);
+
+sub _build_margin_bottom
+{   my $self = shift;
+    my $size = $self->margin;
+    $size += 15; # Arbitrary number to allow 10px of footer text
+    return $size;
+};
 
 =head2 top_padding
 
@@ -500,9 +538,7 @@ has _y => (
 
 sub _y_start_default
 {   my $self = shift;
-    my $start = $self->height - $self->margin - $self->top_padding;
-    $start -= 15 if $self->header; # Arbitrary number to allow 10px of header text
-    $start;
+    return $self->height - $self->margin_top;
 }
 
 =head2 heading($text, %options)
@@ -533,21 +569,48 @@ C<n> is the amount (in points) of vertical skip for the margin I<below> the head
 
 =cut
 
+# Return the line height based on a font size, with optional ratio
+sub _line_height {
+    my ($self, $size, $ratio) = @_;
+    $size * ($ratio || 1.5);
+}
+
+# Return the spacing above/below a line based on font size and line height
+sub _line_spacing {
+    my ($self, $size) = @_;
+    my $spacing = $self->_line_height($size);
+    ($spacing - $size) / 2;
+}
+
 sub heading
 {   my ($self, $string, %options) = @_;
-    $self->_down($options{topmargin}) if $options{topmargin};
+
+    $self->page; # Ensure that page is built and cursor adjusted for first use
+
     $self->add_page if $self->_y < 150; # Make sure there is room for following paragraph text
     my $size = $options{size} || 16;
-    if ($self->is_new_page)
+
+    if ($options{topmargin}) {
+        # Always let override take precedence
+        $self->_down($options{topmargin}) if $options{topmargin};
+    }
+    elsif ($self->is_new_page)
     {
+        # If a new page then move down just enough to fit in the font size
         $self->_down($size);
         $self->_set_is_new_page(0);
+    }
+    else {
+        # Default to top margin based on font size, with slightly higher
+        # spacing ratio than normal text
+        $self->_down($self->_line_height($size, 1.8));
     }
     my $tb  = PDF::TextBlock->new({
         pdf  => $self->pdf,
         page => $self->page,
         x    => $self->_x + ($options{indent} || 0),
         y    => $self->_y,
+        lead => $self->_line_height($size, 1.6),
         fonts => {
             # Workaround a bug in PDF::TextBlock which defines word spacing
             # based on the default font. This can lead to spacing that is too
@@ -568,9 +631,13 @@ sub heading
     });
     $tb->text('<b>'.$string.'</b>');
     my ($endw, $ypos) = $tb->apply;
-    $self->_set__y($ypos);
-    my $bottommargin = defined $options{bottommargin} ? $options{bottommargin} : 10; # Allow zero
-    $self->_down($bottommargin) if $bottommargin;
+    $self->_set__y($ypos + $self->_line_height($size)); # Move cursor back to end of last line printed
+
+    # Unless otherwise defined, add a bottom margin relative to the font size,
+    # but smaller than the top margin
+    my $bottommargin = defined $options{bottommargin} ? $options{bottommargin} : $self->_line_height($size, 0.4);;
+
+    $self->_down($bottommargin);
 }
 
 =head2 text($text, %options)
@@ -601,11 +668,19 @@ sub text
     my $size = $options{size} || 10;
     my $color = $options{color} || 'black';
 
+    $self->page; # Ensure that page is built and cursor adjusted for first use
+
     if ($self->is_new_page)
     {
-        $self->_down($size);  # TBD using font size as line height?
         $self->_set_is_new_page(0);
     }
+    else {
+        # Only create spacing if below other content
+        $self->_down($self->_line_spacing($size));
+    }
+
+    # Line spacing already accounted for above, now allow enough room for actual font size
+    $self->_down($size);
 
     my $tb  = PDF::TextBlock->new({
         pdf   => $self->pdf,
@@ -613,7 +688,8 @@ sub text
         x     => $self->_x + ($options{indent} || 0),
         y     => $self->_y,
         w     => $self->_width_print,
-        h     => $self->_y - $self->margin - 30,
+        h     => $self->_y - $self->margin_bottom,
+        lead  => $self->_line_height($size),
         align => 'left',
         fonts => {
             default => PDF::TextBlock::Font->new({
@@ -663,18 +739,24 @@ sub text
                 $tb->text($string);
                 ($endw, $ypos, $string) = $tb->apply;
             }
-            $self->_set__y($ypos);
+
+            # Set y cursor to be where the textblock finished, but move cursor
+            # back up to remove new line
+            $self->_set__y($ypos + $tb->lead);
+            # Now shift down the actual line spacing distance
+            $self->_down($self->_line_spacing($size));
             last unless $string; # while loop does not work with $string
         }
         $self->add_page;
-        $self->_down($size); # TBD again, font size as line height?
+        $self->_down($size);
         $tb  = PDF::TextBlock->new({
             pdf   => $self->pdf,
             page  => $self->page,
             x     => $self->_x,
             y     => $self->_y,
             w     => $self->_width_print,
-            h     => $self->_y - $self->margin - 30,
+            h     => $self->_y - $self->margin_bottom,
+            lead  => $self->_line_height($size),
             align => 'left',
             fonts => {
                 default => PDF::TextBlock::Font->new({
@@ -692,8 +774,6 @@ sub text
             },
         });
     }
-
-    $self->_down(5);
 }
 
 =head2 table(%options)
@@ -707,27 +787,31 @@ PDF::Table.
 sub table
 {   my ($self, %options) = @_;
 
-    # Move onto new page if little space left on this one
-    $self->add_page if $self->_y < 100;
+    $self->page; # Ensure that page is built and cursor adjusted for first use
+
+    # Move onto new page if little space left on this one.
+    # TODO Change arbitary "60" to something calculated? Needs to be able to
+    # fit header and one row as a minimum.
+    $self->add_page if $self->_y < 60 + $self->margin_bottom;
 
     my $table = PDF::Table->new;
 
     my $data = delete $options{data};
 
+    # Create spacing above and below table based on the line spacing for text
+    # of 10 points
+    $self->_down($self->_line_height(10));
+
     # Keep separate so easy to dump for debug
-    my $hf_space = 0;
-    $hf_space += 40 if $self->footer;
-    $hf_space += 40 if $self->header;
     my %dimensions = (
-        next_h    => $self->height - $self->margin - ($self->height - $self->_y_start_default) - $self->margin,
+        next_h    => $self->_y_start_default - $self->margin_bottom,
         x         => $self->_x,
         w         => $self->_width_print,
         font_size => 10,
         padding   => 5,
-        # start_y deprecated, change soon to y. start_h deprecated, change to h
         y         => $self->_y,
-        h         => $self->height - ($self->height - $self->_y) - $self->margin - $hf_space,
-        next_y    => $self->height - $self->margin - ($self->height - $self->_y_start_default),
+        h         => $self->_y - $self->margin_bottom,
+        next_y    => $self->_y_start_default,
     );
     my ($final_page, $number_of_pages, $final_y) = $table->table(
         $self->pdf,
@@ -750,8 +834,10 @@ sub table
         },
         %options,
     );
+    $self->clear_new_page;
     $self->_set__y($final_y);
-    $self->_down(20);
+    # As above, padding below table
+    $self->_down($self->_line_height(10));
 }
 
 sub _image_type
@@ -800,6 +886,7 @@ sub image
     my $image = $self->pdf->$type($file);
     my $gfx = $self->page->gfx;
     $gfx->image($image, $x, $self->_y, $scaling);
+    $self->clear_new_page;
 }
 
 =head2 content
