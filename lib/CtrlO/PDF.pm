@@ -94,6 +94,15 @@ module. Also, it is built on either PDF::Builder or PDF::API2, and provides
 access to that object, so content can also be added directly using that,
 thereby providing any powerful features required.
 
+B<Updates in v0.20> Note that version 0.20 contains a number breaking changes
+to improve the default layout and spacing of a page. This better ensures that
+content added to a page "just works" in terms of its layout, without needing
+tweaks to its spacing. For example, headers have better spacing above and below
+by default. This means that PDFs produced with this version will be laid out
+differently to those produced with earlier versions. In the main, old code
+should be able to be updated by simply removing any manual spacing fudges (e.g.
+manual spacing for headers).
+
 =head1 METHODS
 
 =cut
