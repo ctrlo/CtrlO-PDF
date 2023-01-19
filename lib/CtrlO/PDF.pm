@@ -520,7 +520,7 @@ Sets the current Y position. See L</y_position>.
 
 sub set_y_position
 {   my ($self, $y) = @_;
-    $y && $y =~ /^[0-9]+(\.[0-9]+)?$/
+    $y && $y =~ /^-?[0-9]+(\.[0-9]+)?$/
         or croak "Invalid y value for set_y_position: $y";
     $self->_set__y($y);
 }
@@ -534,7 +534,7 @@ will move the cursor up the page, negative values down. See L</y_position>.
 
 sub move_y_position
 {   my ($self, $y) = @_;
-    $y && $y =~ /^[0-9]+(\.[0-9]+)?$/
+    $y && $y =~ /^-?[0-9]+(\.[0-9]+)?$/
         or croak "Invalid y value for move_y_position: $y";
     $self->_set__y($self->_y + $y);
 }
