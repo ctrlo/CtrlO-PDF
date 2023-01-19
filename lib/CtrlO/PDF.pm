@@ -335,7 +335,7 @@ sub _build_margin_top
         $size += $self->logo_height;
         $size += $self->logo_padding;
     }
-    return $size;
+    return int $size;
 };
 
 =head2 margin_bottom
