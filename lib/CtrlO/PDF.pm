@@ -669,10 +669,14 @@ sub text
 
     $text->font($self->font, 10); # Any size, overridden below
 
+    my $top_padding = defined $options{top_padding}
+        ? $options{top_padding}
+        : $self->_line_height($size) - $size;
+
     my ($rc, $next_y, $unused) = $text->column(
         $page, $text, $grfx, $format, $string,
         rect => [$x, $self->_y, $self->_width_print, $height],
-        para => [0, $self->_line_height($size) - $size],
+        para => [0, $top_padding],
         font_size => $size,
         %options
     );
@@ -686,7 +690,7 @@ sub text
 
         ($rc, $next_y, $unused) = $text->column($page, $text, $grfx, 'pre', $unused,
             rect => [$x, $self->_y, $self->_width_print, $height],
-            para => [0, $self->_line_height($size) - $size],
+            para => [0, $top_padding],
             font_size => $size,
             %options,
         );
