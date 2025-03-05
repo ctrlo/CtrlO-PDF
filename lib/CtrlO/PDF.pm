@@ -610,6 +610,14 @@ sub heading
     $text->font($self->fontbold, $size);
     $text->translate($x, $self->_y);
     $text->text($string);
+
+    # Unless otherwise defined, add a bottom margin relative to the font size,
+    # but smaller than the top margin
+    my $bottommargin = defined $options{bottommargin}
+        ? $options{bottommargin}
+        : $self->_line_height($size, 0.4);
+
+    $self->_down($bottommargin);
 }
 
 =head2 text($text, %options)
