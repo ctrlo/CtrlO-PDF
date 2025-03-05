@@ -701,7 +701,7 @@ sub text
         # We need a safety mechanism in case column() does not successfully
         # print any of the text. In this situation, an infinite loop would
         # occur, so look for this condition and bail out if so.
-        my @this_unused = grep $_, map $_->{text}, @$unused;
+        my @this_unused = grep length $_, map $_->{text}, @$unused;
         croak "Unable to print text to PDF: @this_unused"
             if "@last_unused" eq "@this_unused";
         @last_unused = @this_unused;
