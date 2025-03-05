@@ -682,6 +682,15 @@ sub text
         ? $options{top_padding}
         : $self->_line_height($size) - $size;
 
+    # Only create spacing if below other content
+    if ($self->is_new_page)
+    {
+        $self->_set_is_new_page(0);
+    }
+    else {
+        $self->_down($top_padding);
+    }
+
     my ($rc, $next_y, $unused) = $text->column(
         $page, $text, $grfx, $format, $string,
         rect => [$x, $self->_y, $self->_width_print, $height],
