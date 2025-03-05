@@ -681,6 +681,7 @@ sub text
         %options
     );
 
+    my @last_unused;
     while ($rc) {
         # new page
         $page   = $self->add_page;
@@ -696,6 +697,14 @@ sub text
         );
         $self->_set_is_new_page(0);
         last unless grep $_->{text}, @$unused;
+
+        # We need a safety mechanism in case column() does not successfully
+        # print any of the text. In this situation, an infinite loop would
+        # occur, so look for this condition and bail out if so.
+        my @this_unused = map $_->{text}, @$unused;
+        croak "Unable to print text to PDF"
+            if "@last_unused" eq "@this_unused";
+        @last_unused = @this_unused;
     }
 
     $self->_set__y($next_y);
