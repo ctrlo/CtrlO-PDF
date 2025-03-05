@@ -1,5 +1,16 @@
 Revision history for CtrlO::PDF
 
+0.31 Wed Apr 5 2023
+
+    * Start new page if not enough space for initial text
+
+0.30 Mon Jan 20 2023
+
+    * Remove support for PDF::API2, greatly simplifying the code
+    * Remove requirement for PDF::TextBlock, use PDF::Builder instead
+    * Fix inability to use negative values when setting y position
+    * Round top margin to whole number
+
 0.20 Mon Feb 1 2021
 
     * Many minor tweaks to make default page layout better. This breaks
