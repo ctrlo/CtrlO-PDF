@@ -666,9 +666,10 @@ sub text
 
     my $page = $self->page; # Ensure that page is built and cursor adjusted for first use
 
-    # Only create spacing if below other content
-    $self->_set_is_new_page(0)
-        if $self->is_new_page;
+    # Add new page if already at the bottom from previous operation (e.g.
+    # rendering table)
+    $page = $self->add_page
+        if $self->_y - $self->_line_height($size) < $self->margin_bottom;
 
     my $text   = $page->text;
     my $grfx   = $page->gfx;
