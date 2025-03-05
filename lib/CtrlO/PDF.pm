@@ -696,7 +696,7 @@ sub text
             %options,
         );
         $self->_set_is_new_page(0);
-        last unless grep $_->{text}, @$unused;
+        last unless grep length $_->{text}, @$unused;
 
         # We need a safety mechanism in case column() does not successfully
         # print any of the text. In this situation, an infinite loop would
