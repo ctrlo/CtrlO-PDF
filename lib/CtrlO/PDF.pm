@@ -246,6 +246,18 @@ has PDFlib => (
     default => 'PDF::Builder',
 );
 
+=head2 font_size
+
+Sets or returns the font size. Default is 10 (points).
+
+=cut
+
+has font_size => (
+    is      => 'ro',
+    isa     => Int,
+    default => 10,
+);
+
 =head2 width
 
 Sets or returns the width. Default is A4.
@@ -660,7 +672,7 @@ sub text
 
     $string or return;
 
-    my $size = delete $options{size} || 10;
+    my $size = delete $options{size} || $self->font_size;
     my $color = delete $options{color} || 'black';
     my $format = delete $options{format} || 'none';
 
@@ -752,14 +764,14 @@ sub table
 
     # Create spacing above and below table based on the line spacing for text
     # of 10 points
-    $self->_down($self->_line_height(10));
+    $self->_down($self->_line_height($self->font_size));
 
     # Keep separate so easy to dump for debug
     my %dimensions = (
         next_h    => $self->_y_start_default - $self->margin_bottom,
         x         => $self->_x,
         w         => $self->_width_print,
-        font_size => 10,
+        font_size => $self->font_size,
         padding   => 5,
         y         => $self->_y,
         h         => $self->_y - $self->margin_bottom,
@@ -780,7 +792,7 @@ sub table
             font       => $self->fontbold,
             repeat     => 1,
             justify    => 'left',
-            font_size  => 10,
+            font_size  => $self->font_size,
             bg_color   => 'white',
             fg_color   => 'black',
         },
@@ -789,7 +801,7 @@ sub table
     $self->clear_new_page;
     $self->_set__y($final_y);
     # As above, padding below table
-    $self->_down($self->_line_height(10));
+    $self->_down($self->_line_height($self->font_size));
 }
 
 sub _image_type
