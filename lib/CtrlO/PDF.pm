@@ -327,7 +327,7 @@ has margin_top => (
 sub _build_margin_top
 {   my $self = shift;
     my $size = $self->margin + $self->top_padding;
-    $size += 15 if $self->header; # Arbitrary number to allow 10px of header text
+    $size += $self->_line_height($self->font_size) if $self->header;
     if ($self->logo)
     {
         $size += $self->logo_height;
@@ -350,9 +350,7 @@ has margin_bottom => (
 
 sub _build_margin_bottom
 {   my $self = shift;
-    my $size = $self->margin;
-    $size += 15; # Arbitrary number to allow 10px of footer text
-    return $size;
+    return $self->margin + $self->_line_height($self->font_size);
 };
 
 =head2 top_padding
@@ -751,21 +749,18 @@ PDF::Table.
 sub table
 {   my ($self, %options) = @_;
 
-    $self->page; # Ensure that page is built and cursor adjusted for first use
+    # Make sure we've got a page if this was the first time we've been called.
+    $self->page;
 
-    # Move onto new page if little space left on this one.
-    # TODO Change arbitary "60" to something calculated? Needs to be able to
-    # fit header and one row as a minimum.
-    $self->add_page if $self->_y < 60 + $self->margin_bottom;
+    # Add a blank line above the table if we'd printed anything previously
+    if ($self->is_new_page) {
+        $self->_down($self->_line_height($self->font_size));
+    }
 
+    # Work out what sort of table we'd normally produce. Take a copy of the data because
+    # it's passed by reference to PDF::Table, which chews through its arguments.
     my $table = PDF::Table->new;
-
-    my $data = delete $options{data};
-
-    # Create spacing above and below table based on the line spacing for text
-    # of 10 points
-    $self->_down($self->_line_height($self->font_size));
-
+    my @data = @{ delete $options{data} };
     my %dimensions = (
         next_h    => $self->_y_start_default - $self->margin_bottom,
         x         => $self->_x,
@@ -794,16 +789,34 @@ sub table
         },
         %options,
     );
+
+    # Would the table fit on the page in its current position? PDF::Table 1.006 crashes if the
+    # header spans two page boundaries, and in any case we want at least the first row of the
+    # table to fit on the page.
+    # Returns: (0) total height of table, (1) height of header, (2) 0, (3) height of first
+    # row, (4) height of second row etc. - note that "first row" means the first non-header
+    # row.
+    my @vsizes = $table->table($self->pdf, $self->page, [@data], %options, ink => 0);
+    my $first_two_rows_height = $vsizes[1] + $vsizes[3];
+    if ($self->y_position - $first_two_rows_height < $self->margin_bottom) {
+        $self->add_page;
+        $options{y} = $self->_y;
+        $options{h} = $self->_y - $self->margin_bottom;
+    }
+
     my ($final_page, $number_of_pages, $final_y) = $table->table(
         $self->pdf,
         $self->page,
-        $data,
+        [@data],
         %options,
+        ink => 1,
     );
-    $self->clear_new_page;
+
+    # Remember where we got to, and add another blank line below the table. This is definitely
+    # not the start of a new page now.
     $self->_set__y($final_y);
-    # As above, padding below table
     $self->_down($self->_line_height($self->font_size));
+    $self->clear_new_page;
 }
 
 sub _image_type

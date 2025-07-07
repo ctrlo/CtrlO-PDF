@@ -43,15 +43,16 @@ sub test_page_boundary {
     is $pdf->pdf->page_count, 2, 'Our table spanned two pages';
 }
 
-# The table *header* can wrap over a page boundary as well.
+# The table *header* can wrap over a page boundary as well. Setting the Y position to just one
+# point higher results in the first two lines of the table fitting on the page.
 
 sub test_header_page_boundary {
     my $pdf = CtrlO::PDF->new(
         header => "Stuff at the top",
         footer => "Stuff at the bottom",
     );
-    $pdf->page;
-    $pdf->set_y_position(120);
+    $pdf->text('This page unintentionally left blank');
+    $pdf->set_y_position(169);
     # There isn't room on the page, with the standard font size, for all entries in Borges'
     # classification.
     $pdf->table(data => [
@@ -75,4 +76,9 @@ sub test_header_page_boundary {
         ]
     ]);
     is $pdf->pdf->page_count, 2, 'Our table spanned two pages';
+    if ($ENV{AUTHOR_TESTING}) {
+        open (my $fh, '>', 'header_page_boundary.pdf');
+        print $fh $pdf->content;
+        close $fh;
+    }
 }
