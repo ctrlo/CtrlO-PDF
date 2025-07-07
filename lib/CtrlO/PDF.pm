@@ -766,7 +766,6 @@ sub table
     # of 10 points
     $self->_down($self->_line_height($self->font_size));
 
-    # Keep separate so easy to dump for debug
     my %dimensions = (
         next_h    => $self->_y_start_default - $self->margin_bottom,
         x         => $self->_x,
@@ -777,10 +776,7 @@ sub table
         h         => $self->_y - $self->margin_bottom,
         next_y    => $self->_y_start_default,
     );
-    my ($final_page, $number_of_pages, $final_y) = $table->table(
-        $self->pdf,
-        $self->page,
-        $data,
+    %options = (
         %dimensions,
         h_border_w    => 2,
         v_border_w    => 0,
@@ -796,6 +792,12 @@ sub table
             bg_color   => 'white',
             fg_color   => 'black',
         },
+        %options,
+    );
+    my ($final_page, $number_of_pages, $final_y) = $table->table(
+        $self->pdf,
+        $self->page,
+        $data,
         %options,
     );
     $self->clear_new_page;
