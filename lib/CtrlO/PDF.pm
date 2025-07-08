@@ -10,7 +10,7 @@ use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
 use PDF::Table;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =head1 NAME
 
