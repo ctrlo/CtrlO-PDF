@@ -23,7 +23,7 @@ subtest image => sub {
     # Add paragraph text
     $pdf->text("Foobar");
 
-    t::lib::Tools::compare_pdf($pdf, 'sample/004_image.pdf');
+    compare_pdf($pdf, 'sample/004_image.pdf');
 };
 
 done_testing();
