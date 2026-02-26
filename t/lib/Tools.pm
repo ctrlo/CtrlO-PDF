@@ -7,6 +7,7 @@ use File::Spec::Functions qw(catfile);
 use File::Compare qw(compare);
 use Test::Builder::Module;
 use Exporter qw(import);
+use version;
 
 our @EXPORT_OK = qw(compare_pdf);
 
@@ -23,6 +24,7 @@ sub compare_pdf {
     my $dir = tempdir( CLEANUP => 1 );
     # $Test->diag($dir);
 
+    my $pb_version = version->parse($PDF::Builder::VERSION);
     my $file = catfile($dir, 'out.pdf');
 
     open my $out, '>', $file;
@@ -30,7 +32,7 @@ sub compare_pdf {
     print $out $content;
     close $out;
 
-    $Test->is_num(compare($file, $expected_file), 0, 'File is as expected');
+    $Test->is_num(compare($file, "sample/$pb_version/$expected_file"), 0, 'File is as expected');
 }
 
 1;

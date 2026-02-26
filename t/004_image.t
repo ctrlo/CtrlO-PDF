@@ -23,7 +23,7 @@ subtest image => sub {
     # Add paragraph text
     $pdf->text("Foobar");
 
-    compare_pdf($pdf, 'sample/004_image.pdf');
+    compare_pdf($pdf, '004_image.pdf');
 };
 
 done_testing();
