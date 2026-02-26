@@ -107,9 +107,16 @@ latter contains many updates and powerful new features to create feature-rich
 PDF documents and means that PDF::TextBlock is no longer required for this
 module, which uses PDF::Builder's new column() method instead.
 
-=head1 METHODS
+=head1 CONSTRUCTOR
 
-=cut
+=head2 new
+
+The constructor is called C<new>, and accepts a optional hash of options.
+Valid options are mainly the same as all the methods described below, for those
+that get and set options. Some methods are read-only and must be set as options
+to the constructor, others can be set later.
+
+=head1 METHODS
 
 =head2 pdf
 
