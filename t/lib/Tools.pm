@@ -32,7 +32,19 @@ sub compare_pdf {
     print $out $content;
     close $out;
 
-    $Test->is_num(compare($file, "sample/$pb_version/$expected_file"), 0, 'File is as expected');
+    my $message = "Missing expected sample files for PDF::Builder version $pb_version";
+    if (-e "sample/$pb_version") {
+        $Test->is_num(compare($file, "sample/$pb_version/$expected_file"), 0, 'File is as expected');
+    } else {
+        if ($ENV{CI}) {
+            # In the CI it will fail
+            $Test->ok(0, $message);
+        } else {
+            # Regular user installation will skip the check but warn the user
+            # about the missing verification.
+            $Test->diag($message);
+        }
+    }
 }
 
 1;
