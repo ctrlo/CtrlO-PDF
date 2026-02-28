@@ -27,6 +27,16 @@ sub compare_pdf {
     my $pb_version = version->parse($PDF::Builder::VERSION);
     my $file = catfile($dir, 'out.pdf');
 
+    # To (re) generate the expected sample files, run:
+    # GENERATE=1 make test
+    if ($ENV{GENERATE}) {
+        mkdir "sample/$pb_version";
+        open my $out, '>', "sample/$pb_version/$expected_file" or die;
+        binmode $out;
+        print $out $content;
+        close $out;
+    }
+
     open my $out, '>', $file;
     binmode $out;
     print $out $content;
