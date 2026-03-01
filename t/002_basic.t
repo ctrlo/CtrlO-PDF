@@ -26,4 +26,8 @@ subtest baisc => sub {
     $pdf->text("Foobar");
 
     compare_pdf($pdf, '002_basic.pdf');
+    eval {
+        compare_pdf($pdf, '002_basic.pdf');
+    };
+    like $@, qr/Can't use an undefined value as an ARRAY reference/;
 };
