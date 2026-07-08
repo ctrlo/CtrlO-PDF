@@ -10,7 +10,7 @@ use CtrlO::PDF;
 use lib '.';
 use t::lib::Tools qw(compare_pdf);
 
-subtest baisc => sub {
+subtest basic => sub {
     my $pdf = CtrlO::PDF->new(
         footer => "My PDF document footer",
     );
